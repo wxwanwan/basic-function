@@ -1,78 +1,70 @@
-class Set {
+class MySet {
   constructor(props) {
     this.items = {};
-    this.size = 0;
-    this.init(props);
-  }
-  init(property = []) {
-    this.items = {};
-    property.forEach((element, index) => {
+    if (!Array.isArray(props) && props) {
+      throw Error(
+        `${props.toString()} is not iterable (cannot read property Symbol(Symbol.iterator)`
+      );
+    }
+    (props || []).forEach((element, index) => {
       if (!Object.values(this.items).includes(element)) {
-        this.items[index] = element
+        this.items[index] = element;
       }
     });
-    this.size = Object.keys(this.items).length
   }
-  has(property) {
-    return Object.values(this.items).includes(property)
+
+  has(value) {
+    return Object.values(this.items).some((e) => e === value);
   }
+
+  add(value) {
+    if (!this.has(value)) {
+      this.items[this.size()] = value;
+      return true;
+    }
+    return false;
+  }
+  delete(value) {
+    const keys = Object.keys(this.items);
+    const target = keys.find((key) => this.items[key] === value);
+    if (target) {
+      delete this.items[target];
+      return true;
+    }
+    return false;
+  }
+
   clear() {
-    this.items = {}
-    this.size = 0
+    this.items = {};
   }
-  add(property) {
-    if (!this.has(property)) {
-      this.items[this.size] = property;
-      this.size++
-    }
+
+  size() {
+    return Object.keys(this.items).length;
   }
-  delete(property) {
-    if (this.has(property)) {
-      delete this.items[Object.values(this.items).indexOf(property)]
-      this.init(Object.values(this.items))
-    }
-  }
-  entries() {
-    let flag = 0
-    return {
-      next: () => {
-        if (flag !== this.size) {
-          flag++
-          return {
-            value: [Object.values(this.items)[flag - 1], Object.values(this.items)[flag - 1]],
-            done: flag === this.size
-          }
-        } else {
-          return {
-            value: undefined,
-            done: true
-          }
-        }
-      }
-    }
-  }
+
   values() {
-    let flag = 0
+    let flag = 0;
     return {
       next: () => {
-        if (flag !== this.size) {
-          flag++
-          return {
-            value: Object.values(this.items)[flag - 1],
-            done: flag === this.size
-          }
-        } else {
-          return {
-            value: undefined,
-            done: true
-          }
+        if (flag < this.size) {
+          flag++;
         }
-      }
-    }
+        return {
+          value:
+            flag < this.size ? Object.values(this.items)[flag - 1] : undefined,
+          done: flag >= this.size,
+        };
+      },
+    };
   }
+
+  entries() {
+    return Object.entries(this.items);
+  }
+
   forEach(callback) {
     return Object.values(this.items).forEach((element, index) => {
-      callback(element, element)
-    })
+      callback(element, element);
+    });
   }
 }
